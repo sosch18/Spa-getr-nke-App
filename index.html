@@ -1,0 +1,400 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Getränke Ranking</title>
+
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        padding: 10px;
+        background: #f5f5f7;
+      }
+
+      /* Inputs */
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        margin: 6px 0;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+        background: white;
+      }
+
+      /* Buttons */
+      button {
+        padding: 12px;
+        margin-top: 10px;
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        background: #686767;
+        color: white;
+        font-weight: bold;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Cards */
+      .card {
+        background: white;
+        border-radius: 16px;
+        padding: 12px;
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      .card img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+
+      /* ⭐ Stars */
+      .stars span {
+        font-size: 28px;
+        cursor: pointer;
+        color: #ddd;
+        background: transparent !important;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .stars span.star-active {
+        color: #ffd700;
+      }
+
+      /* Chips */
+      .chips button {
+        width: auto;
+        margin: 5px 5px 5px 0;
+        border-radius: 20px;
+        border: none;
+        background: #eee;
+        padding: 8px 12px;
+        color: #686767;
+      }
+
+      .chips .active {
+        background: #686767 !important;
+        color: white;
+      }
+
+      /* Switch */
+      .switch-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 10px 0;
+      }
+
+      .switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+      }
+
+      .switch input {
+        display: none;
+      }
+
+      .slider {
+        position: absolute;
+        background: #ccc;
+        border-radius: 20px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transition: 0.3s;
+      }
+
+      .slider:before {
+        content: "";
+        position: absolute;
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        top: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: 0.3s;
+      }
+
+      .switch input:checked + .slider {
+        background: #555;
+      }
+
+      .switch input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+
+      /* Topbar */
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* Delete */
+      .delete-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 50%;
+        background: #ff4d4f;
+      }
+
+      /* Search */
+      #search {
+        border-radius: 20px;
+      }
+    </style>
+
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#f5f5f7" />
+  </head>
+
+  <body>
+    <div id="screen-form">
+      <h2>🍹 Neues Spaßgetränk</h2>
+
+      <input type="file" id="foto" accept="image/*" />
+
+      <input id="name" placeholder="Name" />
+
+      <select id="typ">
+        <option value="">Typ wählen</option>
+        <option>Dose</option>
+        <option>Glasflasche</option>
+        <option>Plastikflasche</option>
+        <option>Glas</option>
+        <option>Tasse</option>
+      </select>
+
+      <label>😋 Geschmack</label>
+      <div id="geschmack-stars" class="stars"></div>
+
+      <label>🍬 Zucker</label>
+      <div id="zucker-stars" class="stars"></div>
+
+      <label>🌿 Natürlichkeit</label>
+      <div id="nat-stars" class="stars"></div>
+
+      <label>🫧 Sprudel</label>
+      <div class="chips">
+        <button onclick="setChip('sprudel', 'still', this)">still</button>
+        <button onclick="setChip('sprudel', 'medium', this)">medium</button>
+        <button onclick="setChip('sprudel', 'stark', this)">stark</button>
+      </div>
+
+      <label>Temperatur</label>
+      <div class="chips">
+        <button onclick="setChip('temperatur', 'kalt', this)">🧊 kalt</button>
+        <button onclick="setChip('temperatur', 'heiß', this)">🍵 heiß</button>
+      </div>
+
+      <div class="switch-row">
+        <span>💊 Vitamine</span>
+        <label class="switch">
+          <input type="checkbox" id="vitamin" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <span>☕ Koffein</span>
+        <label class="switch">
+          <input type="checkbox" id="koffein" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <span>🍸 Alkohol</span>
+        <label class="switch">
+          <input type="checkbox" id="alkohol" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <button onclick="addDrink()">✅ Hinzufügen</button>
+      <button onclick="showRanking()">🏆 Ranking</button>
+    </div>
+
+    <div id="screen-ranking" style="display: none">
+      <div class="topbar">
+        <button onclick="showForm()" style="width: auto">⬅️</button>
+        <h2>🏆 Ranking</h2>
+      </div>
+
+      <input id="search" placeholder="🔎 suchen..." oninput="render()" />
+
+      <button onclick="resetFilters()">Filter zurücksetzen</button>
+
+      <div class="chips">
+        <button onclick="setFilter('sprudel', '', this)">Alle</button>
+        <button onclick="setFilter('sprudel', 'still', this)">still</button>
+        <button onclick="setFilter('sprudel', 'medium', this)">medium</button>
+        <button onclick="setFilter('sprudel', 'stark', this)">stark</button>
+      </div>
+
+      <div class="chips">
+        <button onclick="setFilter('temperatur', '', this)">Alle</button>
+        <button onclick="setFilter('temperatur', 'kalt', this)">kalt</button>
+        <button onclick="setFilter('temperatur', 'heiß', this)">heiß</button>
+      </div>
+
+      <div id="list"></div>
+    </div>
+
+    <script>
+      let drinks = JSON.parse(localStorage.getItem("drinks")) || [];
+      let selected = { sprudel: "", temperatur: "" };
+      let filters = { sprudel: "", temperatur: "" };
+
+      function createStars(id) {
+        let c = document.getElementById(id);
+        c.dataset.value = 0;
+        for (let i = 1; i <= 5; i++) {
+          let s = document.createElement("span");
+          s.innerHTML = "★";
+          s.onclick = () => {
+            c.dataset.value = i;
+            [...c.children].forEach((x, j) => {
+              x.classList.toggle("star-active", j < i);
+            });
+          };
+          c.appendChild(s);
+        }
+      }
+
+      function setChip(type, value, el) {
+        selected[type] = value;
+        [...el.parentElement.children].forEach((b) =>
+          b.classList.remove("active"),
+        );
+        el.classList.add("active");
+      }
+
+      function setFilter(type, value, el) {
+        filters[type] = value;
+        [...el.parentElement.children].forEach((b) =>
+          b.classList.remove("active"),
+        );
+        el.classList.add("active");
+        render();
+      }
+
+      function resetFilters() {
+        filters = { sprudel: "", temperatur: "" };
+        render();
+      }
+
+      function compressImage(file, cb) {
+        let img = new Image();
+        let r = new FileReader();
+        r.onload = (e) => (img.src = e.target.result);
+        img.onload = () => {
+          let c = document.createElement("canvas");
+          let ctx = c.getContext("2d");
+          let scale = Math.min(300 / img.width, 300 / img.height);
+          c.width = img.width * scale;
+          c.height = img.height * scale;
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          cb(c.toDataURL("image/jpeg", 0.7));
+        };
+        r.readAsDataURL(file);
+      }
+
+      function addDrink() {
+        let file = document.getElementById("foto").files[0];
+
+        let save = (img) => {
+          let d = {
+            id: Date.now(),
+            name: document.getElementById("name").value,
+            typ: document.getElementById("typ").value,
+            geschmack:
+              +document.getElementById("geschmack-stars").dataset.value || 0,
+            zucker: +document.getElementById("zucker-stars").dataset.value || 0,
+            nat: +document.getElementById("nat-stars").dataset.value || 0,
+            sprudel: selected.sprudel,
+            temperatur: selected.temperatur,
+            koffein: document.getElementById("koffein").checked,
+            alkohol: document.getElementById("alkohol").checked,
+            vitamin: document.getElementById("vitamin").checked,
+            foto: img || "",
+          };
+
+          d.score = d.geschmack * 0.5 + d.zucker * 0.2 + d.nat * 0.2;
+          drinks.push(d);
+          localStorage.setItem("drinks", JSON.stringify(drinks));
+          render();
+        };
+
+        if (file) compressImage(file, save);
+        else save("");
+      }
+
+      function deleteDrink(id) {
+        drinks = drinks.filter((d) => d.id !== id);
+        localStorage.setItem("drinks", JSON.stringify(drinks));
+        render();
+      }
+
+      function render() {
+        let list = document.getElementById("list");
+        let search = document.getElementById("search").value.toLowerCase();
+
+        let filtered = drinks.filter((d) => {
+          if (search && !d.name.toLowerCase().includes(search)) return false;
+          if (filters.sprudel && d.sprudel !== filters.sprudel) return false;
+          if (filters.temperatur && d.temperatur !== filters.temperatur)
+            return false;
+          return true;
+        });
+
+        filtered.sort((a, b) => b.score - a.score);
+
+        list.innerHTML = "";
+        filtered.forEach((d) => {
+          list.innerHTML += `
+<div class="card">
+${d.foto ? `<img src="${d.foto}">` : ""}
+<div style="flex:1;">
+<b>${d.name}</b><br>
+<span style="color:#FFD700">${"★".repeat(d.geschmack)}</span>
+<span style="color:#ddd">${"★".repeat(5 - d.geschmack)}</span><br>
+Score: ${d.score.toFixed(2)}
+</div>
+<button class="delete-btn" onclick="deleteDrink(${d.id})">✕</button>
+</div>`;
+        });
+      }
+
+      function showForm() {
+        document.getElementById("screen-form").style.display = "block";
+        document.getElementById("screen-ranking").style.display = "none";
+      }
+
+      function showRanking() {
+        document.getElementById("screen-form").style.display = "none";
+        document.getElementById("screen-ranking").style.display = "block";
+      }
+
+      createStars("geschmack-stars");
+      createStars("zucker-stars");
+      createStars("nat-stars");
+      render();
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("service-worker.js");
+      }
+    </script>
+  </body>
+</html>
