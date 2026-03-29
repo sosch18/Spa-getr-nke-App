@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+    />
+    <title>Getränke Ranking</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        padding: 15px;
+        background: #f5f5f7;
+        margin: 0;
+        overflow-x: hidden;
+      }
+
+      h2 {
+        margin-top: 10px;
+        color: #333;
+      }
+
+      /* Inputs */
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+        background: white;
+        outline: none;
+      }
+
+      /* Buttons */
+      button {
+        padding: 14px;
+        margin-top: 10px;
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        background: #e0e0e0;
+        color: #333;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+        transition:
+          transform 0.1s,
+          background 0.2s,
+          color 0.2s;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button:active {
+        transform: scale(0.96);
+        background: #ccc;
+      }
+
+      /* Cards */
+      .card {
+        background: white;
+        border-radius: 16px;
+        padding: 12px;
+        margin-top: 12px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        width: 100%;
+      }
+
+      .card img {
+        width: 65px;
+        height: 65px;
+        object-fit: cover;
+        border-radius: 12px;
+        background: #eee;
+      }
+
+      /* ⭐ Stars */
+      .stars {
+        margin-bottom: 10px;
+      }
+
+      .stars span {
+        font-size: 32px;
+        cursor: pointer;
+        color: #ddd;
+        transition: color 0.1s;
+      }
+
+      .stars span.star-active {
+        color: #ffd700;
+      }
+
+      /* Chips */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 8px 0 15px 0;
+      }
+
+      .chips button {
+        width: auto;
+        margin: 0;
+        border-radius: 20px;
+        background: #eee;
+        padding: 8px 16px;
+        color: #686767;
+        font-size: 14px;
+      }
+
+      .chips button.active {
+        background: #686767 !important;
+        color: white;
+      }
+
+      /* Switch (Toggle) */
+      .switch-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 8px 0;
+        background: white;
+        padding: 10px 14px;
+        border-radius: 12px;
+      }
+
+      .switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+      }
+
+      .switch input {
+        display: none;
+      }
+
+      .slider {
+        position: absolute;
+        background: #ccc;
+        border-radius: 20px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transition: 0.3s;
+      }
+
+      .slider:before {
+        content: "";
+        position: absolute;
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        top: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: 0.3s;
+      }
+
+      .switch input:checked + .slider {
+        background: #4caf50;
+      }
+
+      .switch input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+
+      /* Topbar */
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+      }
+
+      .back-btn {
+        width: 50px;
+        margin-top: 0;
+      }
+
+      .action-btns {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      .icon-btn {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        font-size: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+      }
+
+      /* Delete */
+      .delete-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        margin-top: 0;
+        border-radius: 50%;
+        background: #ff4d4f;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+        color: #555;
+        font-size: 14px;
+      }
+
+      .filter-group {
+        background: #ececec;
+        padding: 12px;
+        border-radius: 16px;
+        margin-bottom: 15px;
+      }
+
+      /* Custom Alert Modal Style */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 25px;
+        border-radius: 20px;
+        max-width: 320px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-content p {
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 20px;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Screen: Formular -->
+    <div id="screen-form">
+      <h2>🍹 Neues Spaßgetränk</h2>
+
+      <label>Foto hinzufügen</label>
+      <input type="file" id="foto" accept="image/*" />
+
+      <input id="name" placeholder="Name des Getränks" />
+
+      <select id="typ">
+        <option value="">Behälter wählen</option>
+        <option>Dose</option>
+        <option>Glasflasche</option>
+        <option>Plastikflasche</option>
+        <option>Glas</option>
+        <option>Tasse</option>
+      </select>
+
+      <label>😋 Geschmack</label>
+      <div id="geschmack-stars" class="stars"></div>
+
+      <label>🍬 Zuckergehalt</label>
+      <div id="zucker-stars" class="stars"></div>
+
+      <label>🌿 Natürlichkeit</label>
+      <div id="nat-stars" class="stars"></div>
+
+      <label>🫧 Sprudel</label>
+      <div class="chips" data-type="sprudel">
+        <button onclick="setChip('sprudel', 'still', this)">still</button>
+        <button onclick="setChip('sprudel', 'medium', this)">medium</button>
+        <button onclick="setChip('sprudel', 'stark', this)">stark</button>
+      </div>
+
+      <label>Temperatur</label>
+      <div class="chips" data-type="temperatur">
+        <button onclick="setChip('temperatur', 'kalt', this)">🧊 kalt</button>
+        <button onclick="setChip('temperatur', 'heiß', this)">🍵 heiß</button>
+      </div>
+
+      <div class="switch-row">
+        <span>💊 Vitamine</span>
+        <label class="switch">
+          <input type="checkbox" id="vitamin" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <span>☕ Koffein</span>
+        <label class="switch">
+          <input type="checkbox" id="koffein" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <span>🍸 Alkohol</span>
+        <label class="switch">
+          <input type="checkbox" id="alkohol" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <button id="add-btn" onclick="addDrink()">✅ Hinzufügen</button>
+      <button onclick="showRanking()">🏆 Zum Ranking</button>
+    </div>
+
+    <!-- Screen: Ranking -->
+    <div id="screen-ranking" style="display: none">
+      <div class="topbar">
+        <button onclick="showForm()" class="back-btn">⬅️</button>
+        <h2 style="margin: 0">🏆 Ranking</h2>
+        <div class="action-btns">
+          <button class="icon-btn" onclick="backupData()" title="Backup">
+            💾
+          </button>
+          <button
+            class="icon-btn"
+            onclick="document.getElementById('import-file').click()"
+            title="Wiederherstellen"
+          >
+            📂
+          </button>
+          <input
+            type="file"
+            id="import-file"
+            style="display: none"
+            accept=".json"
+            onchange="restoreData(event)"
+          />
+        </div>
+      </div>
+
+      <input id="search" placeholder="🔎 Suchen..." oninput="render()" />
+
+      <div class="filter-group">
+        <label>Filter Behälter:</label>
+        <select id="filter-typ" onchange="render()">
+          <option value="">Alle Behälter</option>
+          <option>Dose</option>
+          <option>Glasflasche</option>
+          <option>Plastikflasche</option>
+          <option>Glas</option>
+          <option>Tasse</option>
+        </select>
+
+        <label>Eigenschaften:</label>
+        <div class="switch-row">
+          <span>💊 Vitamine</span>
+          <label class="switch">
+            <input type="checkbox" id="filter-vitamin" onchange="render()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="switch-row">
+          <span>☕ Koffein</span>
+          <label class="switch">
+            <input type="checkbox" id="filter-koffein" onchange="render()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="switch-row">
+          <span>🍸 Alkohol</span>
+          <label class="switch">
+            <input type="checkbox" id="filter-alkohol" onchange="render()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <label style="margin-top: 10px">Filter Sprudel:</label>
+        <div class="chips" data-filter="sprudel">
+          <button class="active" onclick="setFilter('sprudel', '', this)">
+            Alle
+          </button>
+          <button onclick="setFilter('sprudel', 'still', this)">still</button>
+          <button onclick="setFilter('sprudel', 'medium', this)">medium</button>
+          <button onclick="setFilter('sprudel', 'stark', this)">stark</button>
+        </div>
+
+        <label>Filter Temperatur:</label>
+        <div class="chips" data-filter="temperatur">
+          <button class="active" onclick="setFilter('temperatur', '', this)">
+            Alle
+          </button>
+          <button onclick="setFilter('temperatur', 'kalt', this)">kalt</button>
+          <button onclick="setFilter('temperatur', 'heiß', this)">heiß</button>
+        </div>
+
+        <button
+          style="margin-top: 5px; background: #ddd"
+          onclick="resetFilters()"
+        >
+          Filter zurücksetzen
+        </button>
+      </div>
+
+      <div id="list"></div>
+    </div>
+
+    <!-- Custom Modal Container -->
+    <div id="modal-container"></div>
+
+    <script>
+      let drinks = JSON.parse(localStorage.getItem("drinks")) || [];
+      let selected = { sprudel: "", temperatur: "" };
+      let filters = { sprudel: "", temperatur: "" };
+
+      function createStars(id) {
+        let c = document.getElementById(id);
+        c.dataset.value = 0;
+        c.innerHTML = "";
+        for (let i = 1; i <= 5; i++) {
+          let s = document.createElement("span");
+          s.innerHTML = "★";
+          s.onclick = () => {
+            c.dataset.value = i;
+            [...c.children].forEach((x, j) => {
+              x.classList.toggle("star-active", j < i);
+            });
+          };
+          c.appendChild(s);
+        }
+      }
+
+      function setChip(type, value, el) {
+        selected[type] = value;
+        [...el.parentElement.children].forEach((b) =>
+          b.classList.remove("active"),
+        );
+        el.classList.add("active");
+      }
+
+      function setFilter(type, value, el) {
+        filters[type] = value;
+        [...el.parentElement.children].forEach((b) =>
+          b.classList.remove("active"),
+        );
+        el.classList.add("active");
+        render();
+      }
+
+      function resetFilters() {
+        filters = { sprudel: "", temperatur: "" };
+        document.getElementById("filter-typ").value = "";
+        document.getElementById("filter-vitamin").checked = false;
+        document.getElementById("filter-koffein").checked = false;
+        document.getElementById("filter-alkohol").checked = false;
+
+        document
+          .querySelectorAll("[data-filter] button")
+          .forEach((btn) => btn.classList.remove("active"));
+        document.querySelectorAll("[data-filter]").forEach((container) => {
+          container.children[0].classList.add("active");
+        });
+        document.getElementById("search").value = "";
+        render();
+      }
+
+      function compressImage(file, cb) {
+        let img = new Image();
+        let r = new FileReader();
+        r.onload = (e) => (img.src = e.target.result);
+        img.onload = () => {
+          let c = document.createElement("canvas");
+          let ctx = c.getContext("2d");
+          let max_size = 400;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > max_size) {
+              height *= max_size / width;
+              width = max_size;
+            }
+          } else {
+            if (height > max_size) {
+              width *= max_size / height;
+              height = max_size;
+            }
+          }
+          c.width = width;
+          c.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          cb(c.toDataURL("image/jpeg", 0.7));
+        };
+        r.readAsDataURL(file);
+      }
+
+      function addDrink() {
+        const nameInput = document.getElementById("name");
+        if (!nameInput.value.trim()) {
+          nameInput.style.borderColor = "red";
+          setTimeout(() => (nameInput.style.borderColor = "#ddd"), 2000);
+          return;
+        }
+
+        let file = document.getElementById("foto").files[0];
+        let addBtn = document.getElementById("add-btn");
+
+        const originalText = addBtn.innerText;
+        addBtn.innerText = "⌛ Speichere...";
+        addBtn.style.background = "#bbb";
+
+        let save = (img) => {
+          let d = {
+            id: Date.now(),
+            name: nameInput.value,
+            typ: document.getElementById("typ").value,
+            geschmack:
+              +document.getElementById("geschmack-stars").dataset.value || 0,
+            zucker: +document.getElementById("zucker-stars").dataset.value || 0,
+            nat: +document.getElementById("nat-stars").dataset.value || 0,
+            sprudel: selected.sprudel,
+            temperatur: selected.temperatur,
+            koffein: document.getElementById("koffein").checked,
+            alkohol: document.getElementById("alkohol").checked,
+            vitamin: document.getElementById("vitamin").checked,
+            foto: img || "",
+          };
+
+          d.score = d.geschmack * 0.6 + d.nat * 0.3 + d.zucker * 0.1;
+
+          drinks.push(d);
+          localStorage.setItem("drinks", JSON.stringify(drinks));
+
+          setTimeout(() => {
+            addBtn.innerText = "✅ Erledigt!";
+            addBtn.style.background = "#4CAF50";
+            addBtn.style.color = "white";
+
+            resetForm();
+            render();
+
+            setTimeout(() => {
+              addBtn.innerText = originalText;
+              addBtn.style.background = "";
+              addBtn.style.color = "";
+            }, 1500);
+          }, 400);
+        };
+
+        if (file) compressImage(file, save);
+        else save("");
+      }
+
+      function resetForm() {
+        document.getElementById("name").value = "";
+        document.getElementById("typ").value = "";
+        document.getElementById("foto").value = "";
+        document.getElementById("koffein").checked = false;
+        document.getElementById("alkohol").checked = false;
+        document.getElementById("vitamin").checked = false;
+
+        ["geschmack-stars", "zucker-stars", "nat-stars"].forEach((id) => {
+          let c = document.getElementById(id);
+          c.dataset.value = 0;
+          [...c.children].forEach((s) => s.classList.remove("star-active"));
+        });
+
+        selected = { sprudel: "", temperatur: "" };
+        document
+          .querySelectorAll("[data-type] button")
+          .forEach((b) => b.classList.remove("active"));
+      }
+
+      function deleteDrink(id) {
+        drinks = drinks.filter((d) => d.id !== id);
+        localStorage.setItem("drinks", JSON.stringify(drinks));
+        render();
+      }
+
+      function render() {
+        let list = document.getElementById("list");
+        let search = document.getElementById("search").value.toLowerCase();
+
+        let filterTyp = document.getElementById("filter-typ").value;
+        let filterVit = document.getElementById("filter-vitamin").checked;
+        let filterKof = document.getElementById("filter-koffein").checked;
+        let filterAlk = document.getElementById("filter-alkohol").checked;
+
+        let filtered = drinks.filter((d) => {
+          if (search && !d.name.toLowerCase().includes(search)) return false;
+          if (filters.sprudel && d.sprudel !== filters.sprudel) return false;
+          if (filters.temperatur && d.temperatur !== filters.temperatur)
+            return false;
+          if (filterTyp && d.typ !== filterTyp) return false;
+          if (filterVit && !d.vitamin) return false;
+          if (filterKof && !d.koffein) return false;
+          if (filterAlk && !d.alkohol) return false;
+          return true;
+        });
+
+        filtered.sort((a, b) => b.score - a.score);
+
+        list.innerHTML = "";
+        if (filtered.length === 0) {
+          list.innerHTML =
+            "<p style='text-align:center; color:#999; margin-top:20px;'>Keine Treffer.</p>";
+          return;
+        }
+
+        filtered.forEach((d) => {
+          list.innerHTML += `
+            <div class="card">
+              ${d.foto ? `<img src="${d.foto}">` : `<div style="width:65px; height:65px; background:#eee; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px;">🥤</div>`}
+              <div style="flex:1;">
+                <b style="font-size:16px;">${d.name}</b><br>
+                <span style="color:#FFD700; font-size:14px;">${"★".repeat(d.geschmack)}</span>
+                <span style="color:#ddd; font-size:14px;">${"★".repeat(5 - d.geschmack)}</span><br>
+                <small style="color:#666">Score: ${d.score.toFixed(1)} | ${d.typ || "Unbekannt"}</small>
+                <div style="font-size: 10px; color: #999; margin-top: 4px;">
+                    ${d.vitamin ? "💊 Vit " : ""}${d.koffein ? "☕ Kof " : ""}${d.alkohol ? "🍸 Alk" : ""}
+                </div>
+              </div>
+              <button class="delete-btn" onclick="deleteDrink(${d.id})">✕</button>
+            </div>`;
+        });
+      }
+
+      function showForm() {
+        document.getElementById("screen-form").style.display = "block";
+        document.getElementById("screen-ranking").style.display = "none";
+      }
+
+      function showRanking() {
+        document.getElementById("screen-form").style.display = "none";
+        document.getElementById("screen-ranking").style.display = "block";
+        render();
+      }
+
+      // Backup-Funktion (Exportiert als JSON)
+      function backupData() {
+        if (drinks.length === 0) {
+          showModal("Keine Daten zum Sichern vorhanden.");
+          return;
+        }
+        const dataStr = JSON.stringify(drinks, null, 2);
+        const dataUri =
+          "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+        const exportFileDefaultName =
+          "getraenke_ranking_backup_" +
+          new Date().toISOString().slice(0, 10) +
+          ".json";
+
+        const linkElement = document.createElement("a");
+        linkElement.setAttribute("href", dataUri);
+        linkElement.setAttribute("download", exportFileDefaultName);
+        linkElement.click();
+      }
+
+      // Restore-Funktion (Importiert aus JSON)
+      function restoreData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const importedDrinks = JSON.parse(e.target.result);
+            if (Array.isArray(importedDrinks)) {
+              showConfirmModal(
+                "Möchtest du alle aktuellen Einträge durch dieses Backup ersetzen?",
+                () => {
+                  drinks = importedDrinks;
+                  localStorage.setItem("drinks", JSON.stringify(drinks));
+                  render();
+                  showModal("Daten erfolgreich wiederhergestellt!");
+                },
+              );
+            } else {
+              showModal("Fehler: Die Datei hat ein ungültiges Format.");
+            }
+          } catch (err) {
+            showModal("Fehler beim Verarbeiten der Backup-Datei.");
+          }
+        };
+        reader.readAsText(file);
+        event.target.value = "";
+      }
+
+      // Custom Modal Helfer
+      function showModal(text) {
+        const container = document.getElementById("modal-container");
+        container.innerHTML = `
+          <div class="modal-overlay">
+            <div class="modal-content">
+              <p>${text}</p>
+              <button onclick="document.getElementById('modal-container').innerHTML=''">OK</button>
+            </div>
+          </div>
+        `;
+      }
+
+      function showConfirmModal(text, onConfirm) {
+        const container = document.getElementById("modal-container");
+        const confirmId = "confirm-" + Date.now();
+        container.innerHTML = `
+          <div class="modal-overlay">
+            <div class="modal-content">
+              <p>${text}</p>
+              <div style="display:flex; gap:10px;">
+                <button id="${confirmId}" style="background:#4caf50; color:white;">Ja, Ersetzen</button>
+                <button onclick="document.getElementById('modal-container').innerHTML=''">Abbrechen</button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.getElementById(confirmId).onclick = () => {
+          onConfirm();
+          container.innerHTML = "";
+        };
+      }
+
+      createStars("geschmack-stars");
+      createStars("zucker-stars");
+      createStars("nat-stars");
+      render();
+    </script>
+  </body>
+</html>
